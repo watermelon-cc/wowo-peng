@@ -72,7 +72,8 @@ const handleSignUp = async () => {
     if (signUpError) throw signUpError
 
     // 检查是否需要邮箱验证
-    if (data?.user?.identities?.length === 0) {
+    // if (data?.user?.identities?.length === 0) {
+    if (data?.aud === 'authenticated') {
       verificationSent.value = true
       error.value = '请检查您的邮箱以完成验证'
     } else {
