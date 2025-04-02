@@ -3,9 +3,11 @@ name: CI
 on:
   push:
     branches:
+      - master
       - main
   pull_request:
     branches:
+      - master
       - main
 
 jobs:
@@ -14,15 +16,74 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: 'npm'
+          cache-dependency-path: |
+            **/package-lock.json
+            **/package.json
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ~/.cache/Cypress
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run tests
+        run: npm run test:unit
 
       - name: Run build
         run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+      - name: Check bundle size
+        run: |
+          npm install -g vite-bundle-visualizer
+          vite-bundle-visualizer --stats stats.json
+          if [ $(cat stats.json | jq -r '.assets[].size' | awk '{sum+=$1} END {print sum}') -gt 500000 ]; then
+            echo "Bundle size exceeds 500KB limit"
+            exit 1
+          fi
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      # 这里可以添加部署步骤，比如部署到服务器或云平台
+      # - name: Deploy to server
+      #   uses: appleboy/scp-action@master
+      #   with:
+      #     host: ${{ secrets.HOST }}
+      #     username: ${{ secrets.USERNAME }}
+      #     key: ${{ secrets.SSH_KEY }}
+      #     source: "dist/*"
+      #     target: "/var/www/html"

@@ -5,10 +5,10 @@
         <div class="menu-header">账户设置</div>
         <ul class="menu-list">
           <li :class="{ active: activeMenu === '/account/profile' }">
-            <a href="/account/profile">个人信息</a>
+            <router-link to="/account/profile">个人信息</router-link>
           </li>
           <li :class="{ active: activeMenu === '/account/security' }">
-            <a href="/account/security">安全设置</a>
+            <router-link to="/account/security">安全设置</router-link>
           </li>
         </ul>
       </div>
@@ -16,10 +16,10 @@
         <div class="menu-header">其他</div>
         <ul class="menu-list">
           <li :class="{ active: activeMenu === '/account/notifications' }">
-            <a href="/account/notifications">通知设置</a>
+            <router-link to="/account/notifications">通知设置</router-link>
           </li>
           <li :class="{ active: activeMenu === '/account/billing' }">
-            <a href="/account/billing">账单信息</a>
+            <router-link to="/account/billing">账单信息</router-link>
           </li>
         </ul>
       </div>
