@@ -15,23 +15,7 @@
         label-width="100px"
         :disabled="!isEditing"
       >
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="formData.username" />
-        </el-form-item>
-        
-        <el-form-item label="昵称" prop="nickname">
-          <el-input v-model="formData.nickname" />
-        </el-form-item>
-        
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="formData.email" />
-        </el-form-item>
-        
-        <el-form-item label="手机号" prop="phone">
-          <el-input v-model="formData.phone" />
-        </el-form-item>
-        
-        <el-form-item label="头像">
+      <el-form-item label="头像">
           <el-upload
             class="avatar-uploader"
             action="/api/upload"
@@ -44,6 +28,29 @@
             <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
           </el-upload>
         </el-form-item>
+
+        <el-form-item label="用户名" prop="user_name">
+          <el-input v-model="formData.user_name" />
+        </el-form-item>
+        
+        <el-form-item label="年龄" prop="age">
+          <el-input v-model.number="formData.age" type="number" />
+        </el-form-item>
+        
+        <el-form-item label="性别" prop="sex">
+          <el-select v-model="formData.sex" placeholder="请选择性别">
+            <el-option label="男" value="male" />
+            <el-option label="女" value="female" />
+          </el-select>
+        </el-form-item>
+        
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="formData.email" />
+        </el-form-item>
+        
+        <el-form-item label="手机号" prop="phone">
+          <el-input v-model="formData.phone" />
+        </el-form-item>
         
         <el-form-item v-if="isEditing">
           <el-button type="primary" @click="handleSave">保存</el-button>
@@ -55,28 +62,36 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
+import { supabase } from '@/lib/supabase'
+import { faker } from '@faker-js/faker'
 
 const isEditing = ref(false)
 const formRef = ref(null)
 
 const formData = reactive({
-  username: '',
-  nickname: '',
+  id: null,
+  user_name: '',
+  age: null,
+  sex: '',
   email: '',
   phone: '',
   avatar: ''
 })
 
 const rules = {
-  username: [
+  user_name: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
     { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
   ],
-  nickname: [
-    { required: true, message: '请输入昵称', trigger: 'blur' }
+  age: [
+    { required: true, message: '请输入年龄', trigger: 'blur' },
+    { type: 'number', min: 1, max: 120, message: '年龄必须在 1 到 120 之间', trigger: 'blur' }
+  ],
+  sex: [
+    { required: true, message: '请选择性别', trigger: 'change' }
   ],
   email: [
     { required: true, message: '请输入邮箱地址', trigger: 'blur' },
@@ -91,11 +106,38 @@ const rules = {
 // 获取用户信息
 const getUserInfo = async () => {
   try {
-    // TODO: 调用获取用户信息的API
-    // const res = await getUserProfile()
-    // Object.assign(formData, res.data)
+    const { data } = await supabase.auth.getUser()
+    formData.email = data?.user?.email || ''
+    const id = data?.user?.id
+    if(!id) return
+    formData.id = id
+    getUserDetails(id)
   } catch (error) {
     ElMessage.error('获取用户信息失败')
+  }
+}
+
+// 获取用户详细信息
+const getUserDetails = async (id) => {
+  try {
+    let { data: user_info } = await supabase
+      .from('user_info')
+      .select('*')
+    
+    if(!user_info.length) {
+      formData.user_name = faker.person.fullName()
+      formData.age = faker.number.int({ min: 18, max: 60 })
+      formData.sex = 'male'
+      formData.email = faker.internet.email()
+      formData.phone = faker.phone.number('1##########')
+      formData.avatar = faker.image.avatar()
+    } else {
+      let user = user_info.find(user => user.id === id)
+      // 通过Object.assign() 方法将 user 对象的属性复制到 formData 对象中
+      Object.assign(formData, user)
+    }
+  } catch (error) {
+    ElMessage.error('获取用户详细信息失败')
   }
 }
 
@@ -111,8 +153,23 @@ const handleSave = async () => {
   await formRef.value.validate(async (valid) => {
     if (valid) {
       try {
-        // TODO: 调用更新用户信息的API
-        // await updateUserProfile(formData)
+        const { data, error } = await supabase
+          .from('user_info')
+          .insert({
+            id: formData.id,
+            user_name: formData.user_name,
+            age: formData.age,
+            sex: formData.sex,
+            email: formData.email,
+            phone: formData.phone,
+            avatar: formData.avatar
+          })
+          .select()
+
+        if (error) {
+          throw error
+        }
+
         ElMessage.success('保存成功')
         isEditing.value = false
       } catch (error) {
@@ -149,7 +206,9 @@ const beforeAvatarUpload = (file) => {
 }
 
 // 页面加载时获取用户信息
-getUserInfo()
+onMounted(() => {
+  getUserInfo()
+})
 </script>
 
 <style scoped>
@@ -173,8 +232,9 @@ getUserInfo()
 }
 
 .avatar-uploader .avatar {
-  width: 100px;
-  height: 100px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
   display: block;
   object-fit: cover;
 }
@@ -192,7 +252,7 @@ getUserInfo()
   border-color: var(--el-color-primary);
 }
 
-.avatar-uploader-icon {
+avatar-uploader-icon {
   font-size: 28px;
   color: #8c939d;
   width: 100px;
