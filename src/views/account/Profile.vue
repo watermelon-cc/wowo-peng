@@ -123,6 +123,7 @@ const getUserDetails = async (id) => {
     let { data: user_info } = await supabase
       .from('user_info')
       .select('*')
+      .eq('id', id)
     
     if(!user_info.length) {
       formData.user_name = faker.person.fullName()
