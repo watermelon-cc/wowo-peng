@@ -23,12 +23,12 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { useUserStore } from '../../stores/store'
+import { useAuthStore } from '../../stores/store'
 import { computed } from 'vue'
 import { supabase } from '../../lib/supabase'
 
 const router = useRouter()
-const userStore = useUserStore()
+const userStore = useAuthStore()
 
 const isHomePage = computed(() => router.currentRoute.value.path === '/home')
 

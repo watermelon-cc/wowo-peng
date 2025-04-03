@@ -1,16 +1,16 @@
 <template>
   <div class="home-container">
     <div class="flex items-center h-50">
-      <span>{{ $faker.person.fullName() }} {{ $faker.person.jobArea() }}</span>
+      <span>{{ userStore.user_info?.user_name }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useUserStore } from '../../stores/store'
+import { useAuthStore } from '../../stores/store'
 import { getCurrentInstance } from 'vue'
 
-const userStore = useUserStore()
+const userStore = useAuthStore()
 const { proxy } = getCurrentInstance()
 const faker = proxy.$faker
 </script>

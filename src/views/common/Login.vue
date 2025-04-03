@@ -41,12 +41,12 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useUserStore } from '../../stores/store'
+import { useAuthStore } from '../../stores/store'
 import { supabase } from '../../lib/supabase'
 import { watchAndUpdateUserInfo } from '@/api/common.api'
 
 const router = useRouter()
-const userStore = useUserStore()
+const userStore = useAuthStore()
 const email = ref('')
 const password = ref('')
 const loading = ref(false)

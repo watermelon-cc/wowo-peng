@@ -10,7 +10,7 @@ import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import App from './App.vue'
 import router from './router'
-import { useUserStore } from './stores/store'
+import { useAuthStore } from './stores/store'
 import { supabase } from './lib/supabase'
 import { faker } from '@faker-js/faker';
 
@@ -25,7 +25,7 @@ app.use(router)
 app.config.globalProperties.$faker = faker
 app.config.globalProperties.$supabase = supabase
 // 初始化用户状态
-const userStore = useUserStore()
+const userStore = useAuthStore()
 const initUserState = async () => {
   try {
     const { data: { session } } = await supabase.auth.getSession()

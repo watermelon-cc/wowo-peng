@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { getApiConfig } from '../config/namespace'
-import { useUserStore } from '../stores/store'
+import { useAuthStore } from '../stores/store'
 import { ElMessage } from 'element-plus'
 
 // 创建 axios 实例
@@ -14,7 +14,7 @@ const service = axios.create({
 // 请求拦截器
 service.interceptors.request.use(
   config => {
-    const userStore = useUserStore()
+    const userStore = useAuthStore()
     // 如果有 token，添加到请求头
     if (userStore.access_token) {
       config.headers['Authorization'] = `Bearer ${userStore.access_token}`
@@ -43,7 +43,7 @@ service.interceptors.response.use(
     switch (error.response?.status) {
       case 401:
         // 未授权，清除用户信息并跳转到登录页
-        const userStore = useUserStore()
+        const userStore = useAuthStore()
         userStore.logout()
         window.location.href = '/login'
         break

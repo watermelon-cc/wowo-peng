@@ -76,6 +76,7 @@ import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { supabase } from '@/lib/supabase'
 import { faker } from '@faker-js/faker'
+import { useAuthStore } from '@/stores/store'
 
 const isEditing = ref(false)
 const loading = ref(false)
@@ -131,7 +132,7 @@ const getUserInfo = async () => {
     if (error) throw error
     
     if (profile) {
-      console.log(profile)
+      profile.age = Number(profile.age)
       Object.assign(formData, profile)
     } else {
       // 如果没有用户信息，使用默认值
@@ -153,23 +154,61 @@ const getUserInfo = async () => {
 // 保存用户信息
 const saveUserInfo = async () => {
   try {
-    const { error } = await supabase
+    let result
+    
+    // 先查询用户信息是否存在
+    const { data: existingData, error: queryError } = await supabase
       .from('user_info')
-      .upsert({
-        id: formData.id,
-        user_name: formData.user_name,
-        age: formData.age,
-        sex: formData.sex,
-        email: formData.email,
-        phone: formData.phone,
-        avatar: formData.avatar
-      })
+      .select('*')
+      .eq('id', formData.id)
+      .single()
+    
+    if (queryError && queryError.code !== 'PGRST116') { // PGRST116 表示记录不存在
+      throw queryError
+    }
+    
+    if (existingData) {
+      // 编辑保存
+      const { data, error } = await supabase
+        .from('user_info')
+        .update({
+          user_name: formData.user_name,
+          age: formData.age,
+          sex: formData.sex,
+          email: formData.email,
+          phone: formData.phone,
+          avatar: formData.avatar
+        })
+        .eq('id', formData.id)
+        .select()
+      
+      if (error) throw error
+      result = data[0]
+    } else {
+      // 新增保存
+      const { data, error } = await supabase
+        .from('user_info')
+        .insert({
+          id: formData.id,
+          user_name: formData.user_name,
+          age: formData.age,
+          sex: formData.sex,
+          email: formData.email,
+          phone: formData.phone,
+          avatar: formData.avatar
+        })
+        .select()
+      
+      if (error) throw error
+      result = data[0]
+    }
 
-    if (error) throw error
+    // 更新 store 中的用户信息
+    useAuthStore().setUserInfo(result)
     return true
   } catch (error) {
     console.error('保存用户信息失败:', error)
-    ElMessage.error('保存失败')
+    ElMessage.error('保存失败：' + error.message)
     return false
   }
 }
