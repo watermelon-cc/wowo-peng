@@ -10,22 +10,32 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
+          cache: 'npm'
 
       - name: Install Dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build Project
         run: npm run build -- --base=/wowo-peng/ # 设置项目 base 地址
+        env:
+          NODE_ENV: production
 
       - name: Deploy to Pages
+        id: deployment
         uses: actions/deploy-pages@v2
         with:
           path: dist  # 打包输出目录
