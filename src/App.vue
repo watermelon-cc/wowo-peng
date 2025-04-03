@@ -1,30 +1,16 @@
 <template>
   <div id="app">
-    <Header v-if="userStore.userInfo" />
+    <Header v-if="userStore.isLoggedIn" />
     <router-view style="flex: 1; overflow: hidden;" />
   </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
 import { useUserStore } from './stores/store'
-import { supabase } from './lib/supabase'
 import Header from './components/common/Header.vue'
 
-const router = useRouter()
 const userStore = useUserStore()
 
-const handleLogout = async () => {
-  try {
-    const { error } = await supabase.auth.signOut()
-    if (error) throw error
-
-    userStore.clearUserState()
-    router.push('/login')
-  } catch (error) {
-    console.error('登出失败:', error.message)
-  }
-}
 </script>
 
 <style scoped>

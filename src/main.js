@@ -32,7 +32,7 @@ const initUserState = async () => {
     
     if (session) {
       userStore.setAccessToken(session.access_token)
-      userStore.setUserInfo(session.user)
+      userStore.setAuthInfo(session.user)
     }
   } catch (error) {
     console.error('初始化用户状态失败:', error.message)

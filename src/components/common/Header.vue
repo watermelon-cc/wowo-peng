@@ -4,7 +4,7 @@
       {{ isHomePage ? 'Wowo-peng' : '返回主页' }}
     </h1>
     <div class="user-info">
-      <span>欢迎 {{ userStore.userInfo.email }}</span>
+      <span>欢迎 {{ userStore.user_info?.email }}</span>
       <el-badge :value="2" class="item" type="primary">
         <el-popover placement="bottom" trigger="hover">
           <ul class="popover-menu">
@@ -13,7 +13,7 @@
             <li @click="handleLogout">退出</li>
           </ul>
           <template #reference>
-            <el-avatar :src="$faker.image.avatar()" :size="32"/>
+            <el-avatar :src="userStore.user_info?.avatar || $faker.image.avatar()" :size="32"/>
           </template>
         </el-popover>
       </el-badge>
@@ -25,7 +25,7 @@
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../../stores/store'
 import { computed } from 'vue'
-import { supabase } from '../../lib/supabase' // 确保正确导入 supabase 实例
+import { supabase } from '../../lib/supabase'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -34,7 +34,7 @@ const isHomePage = computed(() => router.currentRoute.value.path === '/home')
 
 const handleLogout = async () => {
   try {
-    const { error } = await supabase.auth.signOut() // 使用导入的 supabase 实例
+    const { error } = await supabase.auth.signOut()
     if (error) throw error
 
     userStore.clearUserState()

@@ -8,8 +8,11 @@
 
 <script setup>
 import { useUserStore } from '../../stores/store'
+import { getCurrentInstance } from 'vue'
 
 const userStore = useUserStore()
+const { proxy } = getCurrentInstance()
+const faker = proxy.$faker
 </script>
 
 <style scoped>
