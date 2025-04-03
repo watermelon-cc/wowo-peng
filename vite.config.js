@@ -10,10 +10,11 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/wowo-peng/',
   plugins: [
     vue(),
     vueDevTools(),
-    utoImport({
+    AutoImport({
       resolvers: [ElementPlusResolver()],
     }),
     Components({

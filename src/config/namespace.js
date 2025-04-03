@@ -2,12 +2,12 @@
 export const API_CONFIG = {
   // 开发环境
   development: {
-    baseURL: 'https://hnzdtwhttoyvyxdcmbnq.supabase.co',
+    baseURL: 'https://yyriydjopvckeqlqtcbm.supabase.co',
     timeout: 10000
   },
   // 生产环境
   production: {
-    baseURL: 'https://hnzdtwhttoyvyxdcmbnq.supabase.co',
+    baseURL: 'https://yyriydjopvckeqlqtcbm.supabase.co',
     timeout: 10000
   }
 }

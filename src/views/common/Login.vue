@@ -43,6 +43,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../../stores/store'
 import { supabase } from '../../lib/supabase'
+import { watchAndUpdateUserInfo } from '@/api/common.api'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -72,7 +73,8 @@ const handleSignUp = async () => {
     if (signUpError) throw signUpError
 
     // 检查是否需要邮箱验证
-    if (data?.user?.identities?.length === 0) {
+    // if (data?.user?.identities?.length === 0) {
+    if (data?.aud === 'authenticated') {
       verificationSent.value = true
       error.value = '请检查您的邮箱以完成验证'
     } else {
@@ -110,7 +112,10 @@ const handleLogin = async () => {
 
     // 保存认证信息到 store
     userStore.setAccessToken(data.session.access_token)
-    userStore.setUserInfo(data.user)
+    userStore.setAuthInfo(data.user)
+    
+    // 开始监听用户信息更新
+    watchAndUpdateUserInfo()
 
     router.push('/home')
   } catch (err) {

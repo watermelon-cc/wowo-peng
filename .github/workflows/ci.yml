@@ -1,0 +1,31 @@
+name: Deploy to GitHub Pages
+on:
+  push:
+    branches: [master] # 修改为 master 分支
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Project
+        run: npm run build -- --base=/wowo-peng/ # 设置项目 base 地址
+
+      - name: Deploy to Pages
+        uses: actions/deploy-pages@v2
+        with:
+          path: dist  # 打包输出目录

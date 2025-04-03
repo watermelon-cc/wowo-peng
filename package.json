@@ -19,6 +19,7 @@
     "vue-router": "4"
   },
   "devDependencies": {
+    "@faker-js/faker": "^9.6.0",
     "@vitejs/plugin-vue": "^5.2.1",
     "unplugin-auto-import": "^19.1.2",
     "unplugin-vue-components": "^28.4.1",
