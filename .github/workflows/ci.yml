@@ -34,8 +34,20 @@ jobs:
         env:
           NODE_ENV: production
 
+      - name: Debug Info
+        run: |
+          echo "GITHUB_RUN_ID: ${{ github.run_id }}"
+          echo "GITHUB_RUN_NUMBER: ${{ github.run_number }}"
+          echo "GITHUB_SHA: ${{ github.sha }}"
+
       - name: Deploy to Pages
         id: deployment
         uses: actions/deploy-pages@v2
         with:
-          path: dist  # 打包输出目录
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: dist
+          branch: gh-pages
+          clean: true
+          clean-exclude: |
+            .git
+            .gitignore
