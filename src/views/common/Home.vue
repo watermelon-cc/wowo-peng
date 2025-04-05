@@ -9,7 +9,7 @@
 </template>
 
 <script setup>
-import { useUserStore } from '../../stores/store'
+import { useAuthStore } from '../../stores/store'
 import { getCurrentInstance, onMounted, reactive, ref} from 'vue'
 import ProjectCard from '@/components/project-card.vue'
 import { get_user_all_project } from '@/api/supabase.project.api'

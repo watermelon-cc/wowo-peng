@@ -1,9 +1,9 @@
 import { supabase } from '@/lib/supabase'
-import { useUserStore } from '@/stores/store'
+import { useAuthStore } from '@/stores/store'
 
 export const get_user_all_project = async () => {
 	try {
-		const userStore = useUserStore()
+		const userStore = useAuthStore()
 
 		let { data, error } = await supabase
 		.from('project')
@@ -19,7 +19,7 @@ export const get_user_all_project = async () => {
 
 export const insert_project = async (params) => {
 	try {
-		const userStore = useUserStore()
+		const userStore = useAuthStore()
 		if (!userStore.auth_info?.id) {
 			throw new Error('用户未登录')
 		}

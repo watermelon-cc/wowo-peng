@@ -50,7 +50,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { useUserStore } from '../../stores/store'
+import { useAuthStore } from '../../stores/store'
 import { computed, ref } from 'vue'
 import { supabase } from '../../lib/supabase'
 import { insert_project } from "@/api/supabase.project.api"
