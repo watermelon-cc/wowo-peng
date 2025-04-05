@@ -4,6 +4,8 @@ import 'caring-css'
 // element-plus
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
@@ -13,6 +15,7 @@ import router from './router'
 import { useAuthStore } from './stores/store'
 import { supabase } from './lib/supabase'
 import { faker } from '@faker-js/faker';
+import utils from './utils/utils'
 
 
 const app = createApp(App)
@@ -24,6 +27,12 @@ app.use(pinia)
 app.use(router)
 app.config.globalProperties.$faker = faker
 app.config.globalProperties.$supabase = supabase
+app.config.globalProperties.$utils = utils
+
+for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+  app.component(key, component)
+}
+
 // 初始化用户状态
 const userStore = useAuthStore()
 const initUserState = async () => {

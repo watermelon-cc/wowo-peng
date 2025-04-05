@@ -94,5 +94,6 @@ const activeMenu = computed(() => route.path)
 .account-content {
   flex: 1;
   padding-left: 20px;
+  overflow-y: auto;
 }
 </style>

@@ -2,14 +2,16 @@
   <div class="profile-container">
     <div class="profile-header">
       <h2>个人信息</h2>
-      <el-button 
-        type="primary" 
-        @click="handleEdit" 
-        v-if="!isEditing"
-        class="edit-button"
-      >
-        编辑
-      </el-button>
+      <div class="header-actions">
+        <el-button 
+          type="primary" 
+          @click="handleEdit" 
+          v-if="!isEditing"
+          class="edit-button"
+        >
+          编辑
+        </el-button>
+      </div>
     </div>
 
     <div class="profile-content">
@@ -22,18 +24,8 @@
         class="profile-form"
       >
         <div class="avatar-section">
-          <el-upload
-            class="avatar-uploader"
-            action="/api/upload"
-            :show-file-list="false"
-            :on-success="handleAvatarSuccess"
-            :before-upload="beforeAvatarUpload"
-            :disabled="!isEditing"
-          >
-            <img v-if="formData.avatar" :src="formData.avatar" class="avatar" />
-            <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
-          </el-upload>
-          <div class="avatar-tip">点击上传头像</div>
+          <img :src="formData.avatar" class="avatar" />
+          <div class="avatar-tip cursor-pointer" v-if="isEditing" @click="refreshAvatar">点击刷新按钮更换头像</div>
         </div>
 
         <div class="form-section">
@@ -112,6 +104,13 @@ const rules = {
     { required: true, message: '请输入手机号', trigger: 'blur' },
     { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
   ]
+}
+
+// 刷新头像
+const refreshAvatar = async () => {
+  formData.avatar = faker.image.avatar()
+  await saveUserInfo()
+  ElMessage.success('头像已更新')
 }
 
 // 获取用户信息
@@ -244,26 +243,6 @@ const handleCancel = () => {
   getUserInfo() // 重新获取用户信息，恢复原始数据
 }
 
-// 头像上传成功回调
-const handleAvatarSuccess = (response) => {
-  formData.avatar = response.url
-  ElMessage.success('头像上传成功')
-}
-
-// 头像上传前的验证
-const beforeAvatarUpload = (file) => {
-  const isJPG = file.type === 'image/jpeg' || file.type === 'image/png'
-  const isLt2M = file.size / 1024 / 1024 < 2
-
-  if (!isJPG) {
-    ElMessage.error('上传头像图片只能是 JPG/PNG 格式!')
-  }
-  if (!isLt2M) {
-    ElMessage.error('上传头像图片大小不能超过 2MB!')
-  }
-  return isJPG && isLt2M
-}
-
 // 页面加载时获取用户信息
 onMounted(() => {
   getUserInfo()
@@ -321,39 +300,20 @@ onMounted(() => {
   gap: 1rem;
 }
 
-.avatar-uploader {
-  text-align: center;
-}
-
-.avatar-uploader .avatar {
+.avatar {
   width: 100px;
   height: 100px;
   border-radius: 50%;
   display: block;
   object-fit: cover;
   border: 2px solid #e5e7eb;
-}
-
-.avatar-uploader .el-upload {
-  border: 2px dashed #e5e7eb;
-  border-radius: 50%;
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
   transition: all 0.3s;
 }
 
-.avatar-uploader .el-upload:hover {
+.avatar:hover {
   border-color: #3ecf8e;
-}
-
-.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  width: 100px;
-  height: 100px;
-  text-align: center;
-  line-height: 100px;
+  transform: scale(1.05);
 }
 
 .avatar-tip {
@@ -392,5 +352,20 @@ onMounted(() => {
 
 .w-full {
   width: 100%;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.refresh-button {
+  background-color: #6b7280;
+  border-color: #6b7280;
+}
+
+.refresh-button:hover {
+  background-color: #4b5563;
+  border-color: #4b5563;
 }
 </style>

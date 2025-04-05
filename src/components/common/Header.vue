@@ -4,6 +4,7 @@
       {{ isHomePage ? 'Wowo-peng' : '返回主页' }}
     </h1>
     <div class="user-info">
+      <el-button type="info" text @click="addProject()">新增项目</el-button>
       <span>欢迎 {{ userStore.user_info?.email }}</span>
       <el-badge :value="2" class="item" type="primary">
         <el-popover placement="bottom" trigger="hover">
@@ -19,18 +20,51 @@
       </el-badge>
     </div>
   </header>
+
+  <el-dialog
+    v-model="dialogVisible"
+    title="新增项目"
+    width="500px"
+  >
+    <el-form :model="projectForm" label-width="80px">
+      <el-form-item label="项目名称">
+        <el-input v-model="projectForm.project_name" placeholder="请输入项目名称" />
+      </el-form-item>
+      <el-form-item label="项目描述">
+        <el-input
+          v-model="projectForm.description"
+          type="textarea"
+          :rows="3"
+          placeholder="请输入项目描述"
+        />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitProject">确定</el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '../../stores/store'
-import { computed } from 'vue'
+import { useUserStore } from '../../stores/store'
+import { computed, ref } from 'vue'
 import { supabase } from '../../lib/supabase'
+import { insert_project } from "@/api/supabase.project.api"
 
 const router = useRouter()
 const userStore = useAuthStore()
 
 const isHomePage = computed(() => router.currentRoute.value.path === '/home')
+
+const dialogVisible = ref(false)
+const projectForm = ref({
+  project_name: '',
+  description: ''
+})
 
 const handleLogout = async () => {
   try {
@@ -42,6 +76,28 @@ const handleLogout = async () => {
   } catch (error) {
     console.error('登出失败:', error.message)
   }
+}
+
+const addProject = () => {
+  dialogVisible.value = true
+}
+
+const resetForm = () => {
+  projectForm.value = {
+    project_name: '',
+    description: ''
+  }
+}
+
+const submitProject = () => {
+  insert_project({...projectForm.value}).then(res => {
+    if(res.success) {
+      dialogVisible.value = false
+      resetForm()
+    }
+  }).catch(error => {
+    console.error('submitProject insert_project===> ', error)
+  })
 }
 
 const returnHome = () => {
@@ -111,5 +167,11 @@ h1 {
 
 .popover-menu li:hover {
   color: #409eff;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
 }
 </style>
