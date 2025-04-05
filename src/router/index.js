@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useUserStore } from '../stores/store'
+import { useAuthStore } from '../stores/store'
 
 const routes = [
   {
@@ -45,13 +45,13 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory('/wowo-peng/'),
   routes
 })
 
 // 路由守卫
 router.beforeEach((to, from, next) => {
-  const userStore = useUserStore()
+  const userStore = useAuthStore()
   
   if (to.meta.requiresAuth && !userStore.isLoggedIn) {
     next('/login')

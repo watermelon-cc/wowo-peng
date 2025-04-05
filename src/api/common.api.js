@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import { useUserStore } from '@/stores/store'
+import { useAuthStore } from '@/stores/store'
 import { watch } from 'vue'
 
 // 获取用户详细信息
@@ -21,7 +21,7 @@ export const fetchUserInfo = async (userId) => {
 
 // 监听 store 变化并更新用户信息
 export const watchAndUpdateUserInfo = () => {
-  const userStore = useUserStore()
+  const userStore = useAuthStore()
   
   // 监听 access_token 变化
   watch(

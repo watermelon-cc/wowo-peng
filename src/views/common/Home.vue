@@ -14,7 +14,7 @@ import { getCurrentInstance, onMounted, reactive, ref} from 'vue'
 import ProjectCard from '@/components/project-card.vue'
 import { get_user_all_project } from '@/api/supabase.project.api'
 
-const userStore = useUserStore()
+const userStore = useAuthStore()
 const { proxy } = getCurrentInstance()
 const faker = proxy.$faker
 

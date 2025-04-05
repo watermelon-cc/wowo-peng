@@ -6,10 +6,10 @@
 </template>
 
 <script setup>
-import { useUserStore } from './stores/store'
+import { useAuthStore } from './stores/store'
 import Header from './components/common/Header.vue'
 
-const userStore = useUserStore()
+const userStore = useAuthStore()
 
 </script>
 

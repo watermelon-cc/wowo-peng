@@ -56,7 +56,7 @@ import { supabase } from '../../lib/supabase'
 import { insert_project } from "@/api/supabase.project.api"
 
 const router = useRouter()
-const userStore = useUserStore()
+const userStore = useAuthStore()
 
 const isHomePage = computed(() => router.currentRoute.value.path === '/home')
 
