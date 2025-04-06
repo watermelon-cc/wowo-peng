@@ -1,8 +1,8 @@
 <template>
-  <div class="h-full p-15">
-    <div class="flex">
+  <div class="h-full p-15 ">
+    <div class="flex h-full" v-loading="loading">
       <div style="width: 500px; height: 300px;" v-for="item of project_list" class="mr-15 mb-15">
-        <ProjectCard :info="item" />
+        <ProjectCard :info="item" @delete="getProjectList" />
       </div>
     </div>
   </div>
@@ -10,22 +10,37 @@
 
 <script setup>
 import { useAuthStore } from '../../stores/store'
-import { getCurrentInstance, onMounted, reactive, ref} from 'vue'
+import { getCurrentInstance, onMounted, onUnmounted, reactive, ref} from 'vue'
 import ProjectCard from '@/components/project-card.vue'
 import { get_user_all_project } from '@/api/supabase.project.api'
+import emitter from '@/utils/eventBus'
 
 const userStore = useAuthStore()
 const { proxy } = getCurrentInstance()
 const faker = proxy.$faker
 
 const project_list = ref([])
+const loading = ref(false)
 
-onMounted(() => {
+const getProjectList = () => {
+  loading.value = true
   get_user_all_project().then(res => {
+    loading.value = false
     project_list.value = res.data || []
   }).catch(error => {
-    console.warn('get_user_all_project ===>', error)
+    loading.value = false
   })
+}
+
+onMounted(() => {
+  getProjectList()
+  // 监听项目列表更新事件
+  emitter.on('project-list-updated', getProjectList)
+})
+
+onUnmounted(() => {
+  // 组件卸载时移除事件监听
+  emitter.off('project-list-updated', getProjectList)
 })
 </script>
 

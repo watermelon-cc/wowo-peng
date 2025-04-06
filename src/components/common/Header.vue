@@ -54,6 +54,7 @@ import { useAuthStore } from '../../stores/store'
 import { computed, ref } from 'vue'
 import { supabase } from '../../lib/supabase'
 import { insert_project } from "@/api/supabase.project.api"
+import emitter from '@/utils/eventBus'
 
 const router = useRouter()
 const userStore = useAuthStore()
@@ -94,6 +95,7 @@ const submitProject = () => {
     if(res.success) {
       dialogVisible.value = false
       resetForm()
+      emitter.emit('project-list-updated')
     }
   }).catch(error => {
     console.error('submitProject insert_project===> ', error)
