@@ -5,6 +5,8 @@ import 'caring-css'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
+
 
 
 import { createApp } from 'vue'
@@ -22,7 +24,7 @@ const app = createApp(App)
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
 
-app.use(ElementPlus)
+app.use(ElementPlus, { locale: zhCn })
 app.use(pinia)
 app.use(router)
 app.config.globalProperties.$faker = faker

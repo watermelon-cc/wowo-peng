@@ -1,7 +1,7 @@
 <template>
   <div class="h-full p-15 ">
     <div class="flex h-full" v-loading="loading">
-      <div style="width: 500px; height: 300px;" v-for="item of project_list" class="mr-15 mb-15">
+      <div style="width: 500px; height: 300px;" v-for="(item, num) of project_list" :key="num" class="mr-15 mb-15">
         <ProjectCard :info="item" @delete="getProjectList" />
       </div>
     </div>
@@ -10,14 +10,13 @@
 
 <script setup>
 import { useAuthStore } from '../../stores/store'
-import { getCurrentInstance, onMounted, onUnmounted, reactive, ref} from 'vue'
-import ProjectCard from '@/components/project-card.vue'
+import { getCurrentInstance, onMounted, onUnmounted, reactive, ref, nextTick } from 'vue'
+import ProjectCard from '@/components/project/project-card.vue'
 import { get_user_all_project } from '@/api/supabase.project.api'
 import emitter from '@/utils/eventBus'
 
 const userStore = useAuthStore()
 const { proxy } = getCurrentInstance()
-const faker = proxy.$faker
 
 const project_list = ref([])
 const loading = ref(false)
@@ -27,6 +26,9 @@ const getProjectList = () => {
   get_user_all_project().then(res => {
     loading.value = false
     project_list.value = res.data || []
+    // nextTick(() => {
+    //   project_list.value = res.data || []
+    // })
   }).catch(error => {
     loading.value = false
   })
