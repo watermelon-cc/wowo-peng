@@ -8,6 +8,7 @@ export const get_user_all_project = async () => {
 		let { data, error } = await supabase
 		.from('project')
 		.select('*')
+		.order('id', { ascending: false }) // 降序排列
 
 		if (error) throw error
 		return { success: true, data }
@@ -89,9 +90,7 @@ export const UPDATE_PROJECT = async (params) => {
 		const { data, error } = await supabase
 		.from('project')
 		.update({ 
-			project_name: params.project_name, 
-			description: params.description || '',
-			cur_version_test_time: params.cur_version_test_time || '',
+			...params
 		})
 		.eq('id', params.id)
 		.eq('user_id', userStore.auth_info.id) // 确保只能更新自己的项目

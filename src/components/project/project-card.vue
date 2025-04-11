@@ -1,10 +1,10 @@
 <template>
-	<div class="w-full h-full rounded border flex-col">
+	<div class="w-full h-full rounded border flex-col" :style="{boxShadow: `var(--el-box-shadow-light)`}">
 		<div class="h-50 flex items-center justify-between cursor-pointer px-15 relative" style="border-bottom: 1px solid #eee;">
 			<!-- 进度背景 -->
 			<div 
 				class="absolute left-0 top-0 h-full bg-blue-100 transition-all duration-300"
-				:style="{ width: `${progressPercentage}%`, 'z-index': 1 }"
+				:style="{ width: `${progressPercentage}%`, 'z-index': 0, borderTopRightRadius: '8px' }"
 			></div>
 			<div class="flex items-center relative z-10">
 				<el-popover trigger="hover">
@@ -26,12 +26,13 @@
         </el-popover>
 
 				<el-badge :value="completedCount" class="item" type="primary" style="z-index: 2;">
-					<span class="text-666 pl-6" :title="info.description">{{ project_info.project_name }}</span>
+					<span class="text-333 pl-6" :title="info.description">{{ project_info.project_name }}</span>
 				</el-badge>
 			</div>
-			<div class="flex items-center" @click="showDateTimeDialog = true" style="z-index: 2;">
+			<!-- <div class="flex items-center" @click="showDateTimeDialog = true" style="z-index: 2;"> -->
+			<div class="flex items-center" style="z-index: 2;">
 				<el-icon size="18" color="#666"><Timer /></el-icon>
-				<span class="text-666 pl-6">提测时间：{{ project_info.cur_version_test_time || '待填写' }}</span>
+				<span class="text-333 pl-6"><span style="font-weight: 500;">提测时间</span>：{{ project_info.cur_version_test_time || '待填写' }}</span>
 			</div>
 		</div>
 		<div class="flex-1 p-15 overflow-auto">
@@ -50,16 +51,20 @@
       :value="project_info.cur_version_test_time"
       @confirm="handleTestTimeConfirm"
     />
+
+		<ProjectDialog ref="projectDialog" v-bind="info" @update="handleUpdateInfo" />
 	</div>
 </template>
 
 <script setup>
-import { faker } from '@faker-js/faker'
+import { fa, faker } from '@faker-js/faker'
 import { ref, reactive, computed } from 'vue'
 import { fromDate } from '@/utils/utils'
 import TodoItem from './todo-item.vue'
-import DateTimeDialog from './common/date-time-dialog.vue'
+import ProjectDialog from './project-dialog.vue'
+import DateTimeDialog from '@/components/common/date-time-dialog.vue'
 import { DEL_PROJECT, UPDATE_PROJECT } from '@/api/supabase.project.api'
+import emitter from '@/utils/eventBus'
 
 const emit = defineEmits(['delete'])
 
@@ -73,8 +78,7 @@ const props = defineProps({
 const showDateTimeDialog = ref(false)
 
 const project_info = reactive({
-	project_name: props.info.project_name || '口腔医院',
-	cur_version_test_time: props.info.cur_version_test_time || ''
+	...props.info,
 })
 
 // 生成5条随机代办事项，包含完成状态
@@ -92,20 +96,22 @@ const completedCount = computed(() => {
 
 // 计算进度百分比
 const progressPercentage = computed(() => {
-	if (!project_info.cur_version_test_time) return 0
+	console.log('project_info', project_info, project_info.cur_version_test_time, project_info.cur_version_start_time)
+	if (!project_info.cur_version_test_time || !project_info.cur_version_start_time) return 0
 	
 	const testTime = new Date(project_info.cur_version_test_time)
+	const startTime = new Date(project_info.cur_version_start_time)
 	const now = new Date()
-	const startTime = new Date(testTime)
-	startTime.setDate(startTime.getDate() - 10) // 提前10天开始
 	
 	// 如果当前时间早于开始时间，进度为0
 	if (now < startTime) return 0
 	// 如果当前时间晚于提测时间，进度为100%
 	if (now > testTime) return 100
 	
-	const totalDuration = testTime - startTime
-	const elapsedDuration = now - startTime
+	const totalDuration = testTime - startTime // all duration
+	const elapsedDuration = now - startTime // elapsed duration
+	console.log('totalDuration', totalDuration)
+	console.log('elapsedDuration', elapsedDuration)
 	return Math.round((elapsedDuration / totalDuration) * 100)
 })
 
@@ -134,24 +140,39 @@ const handleDel = () => {
 	})
 }
 
-const handleEdit = () => {
-	// 这里可以添加编辑项目的逻辑
-	ElMessage({ type: 'info', message: '编辑功能尚未实现' })
-}
+const projectDialog = ref(null)
 
+const handleEdit = () => {
+	projectDialog.value.show(props.info)
+}
+const handleUpdateInfo = function (formData) {
+	UPDATE_PROJECT({
+		...formData
+	}).then(res => {
+		if (res.success) {
+			projectDialog.value.close()
+			ElMessage({ type: 'success', message: res.message })
+			emitter.emit('project-list-updated')
+		} else {
+			ElMessage({ type: 'error', message: res.message })
+		}
+	})
+}
 const handleTestTimeConfirm = (time) => {
-  project_info.cur_version_test_time = time
-  // 这里可以调用API更新提测时间
-  UPDATE_PROJECT({
-    id: props.info.id,
-    cur_version_test_time: time
-  }).then(res => {
-    if (res.success) {
-      ElMessage({ type: 'success', message: res.message })
-    } else {
-      ElMessage({ type: 'error', message: res.message })
-    }
-  })
+	UPDATE_PROJECT({
+		...props.info,
+		cur_version_test_time: time
+	}).then(res => {
+		if (res.success) {
+			ElMessage({ type: 'success', message: res.message })
+			// 添加短暂延迟确保数据更新完成
+			setTimeout(() => {
+				emitter.emit('project-list-updated')
+			}, 100)
+		} else {
+			ElMessage({ type: 'error', message: res.message })
+		}
+	})
 }
 </script>
 
